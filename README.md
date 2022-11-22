@@ -9,5 +9,11 @@ Giulia Piazza
 
 This repository includes the R code and html reports for both staff
 (programme_survey) and student surveys (student_survey), compiled by the
-data analysis subteam (Giulia Piazza, Winfred Gatua, John Oketch,
-Laetitia Sophia De Abreu Nunes).
+data analysis subteam.
+
+**Data analysis subteam**
+
+- Giulia Piazza 
+- Winfred Gatua
+- John Oketch
+- Laetitia Sophia De Abreu Nunes
