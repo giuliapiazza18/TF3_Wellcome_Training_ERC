@@ -1,0 +1,153 @@
+---
+title: "Programme survey"
+author: "Laetitia, Giulia, John, Winfred"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+# Data analysis approach
+
+All answers were read by the assigned analyst. Key themes were extracted, and data was reassigned to newly defined categories and plotted with bar charts.
+
+# Programme survey
+
+## Training providers
+```{r}
+train_provider <- read_excel("Trainingprovider.xlsx")
+p <- ggplot(data=train_provider) +
+  geom_bar(mapping = aes(x=Training,y=count,fill=Trainingprovider),stat='identity', alpha = 0.8, color ="black")+
+  labs(title="Who is the training provided by?",y="Count")+  
+  scale_fill_manual(values = c("deepskyblue","chartreuse","azure4","darkgoldenrod1"))  + theme_classic()  +  
+  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + 
+  labs( y = "Count") + 
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Equality and Diversity', 'Personal Dev.','Professional Dev.','Public Engagement', 'Technical Training', 'Wellbeing'))
+p
+```
+
+
+## Repetition of training
+
+```{r}
+staff_survey_responses <- as.data.frame(read.csv("staff_survey_anonymous_answers_Laeti.csv", header = TRUE)) 
+
+#renaming a variable
+staff_survey_responses$In.which.year.s..does.the.training.take.place[staff_survey_responses$In.which.year.s..does.the.training.take.place == 1] <- "First Year"
+
+staff_survey_responses$Is.it.one.off.training.. <- factor(staff_survey_responses$Is.it.one.off.training.., levels = c("Yes", "Varies", "No", "N/A")) 
+
+
+p <- ggplot(data = staff_survey_responses,
+                   mapping = aes (x = Training.Type, fill = Is.it.one.off.training..)) +
+  geom_bar(alpha = 0.8, color ="black") + #barcharts 
+  labs(title = "Is it one-off training ?", x = "Answer", y = "Count", fill = "Answer") +
+  labs(title="Is it one off training?",y="Count")+  scale_fill_manual(values = c("deepskyblue","chartreuse","azure4","darkgoldenrod1"))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + labs( y = "Count") +
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Public Engagement', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Technical Training', 'Wellbeing'))
+
+p
+
+
+
+```
+
+## Advertisement of training
+
+```{r}
+train_advert <- read_excel("Trainingadvert.xlsx")
+p <- ggplot(data=train_advert) +
+  geom_bar(mapping = aes(x=Training,y=Count,fill=Trainignadvert),alpha= 0.8,stat='identity', color ="black")+
+  labs(title = "How is the training advertised to students?",y="Count")+  scale_fill_manual(values = c('hotpink',"deepskyblue","chartreuse","darkgoldenrod1","darkolivegreen",'azure4'))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + labs( y = "Count")+
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Public Engagement','Technical Training', 'Wellbeing'))
+p
+```
+
+
+## Timing of training (academic year)
+
+```{r, echo = FALSE}
+
+staff_survey_responses$When.in.the.academic.year.does.the.training.take.place.. <- factor(staff_survey_responses$When.in.the.academic.year.does.the.training.take.place.. , levels = c("Beginning of programme", "Autumn Term", "Spring Term", "Throughout", "Varies", "N/A")) 
+
+
+plot_q_b_by_training <- ggplot( data = staff_survey_responses,
+                   mapping = aes (x = Training.Type , fill = When.in.the.academic.year.does.the.training.take.place.. )) +
+  geom_bar(alpha = 0.8, color ="black") + #barcharts 
+  labs(title = "When in the academic year does the training take place?", x = "Answer", y = "Count", fill = "Answer") +  scale_fill_manual(values = c('hotpink',"deepskyblue","chartreuse","darkgoldenrod1","darkolivegreen",'azure4'))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + labs( y = "Count") +
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Public Engagement', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Technical Training', 'Wellbeing'))
+
+plot_q_b_by_training
+
+
+```
+
+## Timing of training (through the PhD)
+
+```{r, echo = FALSE}
+
+staff_survey_responses$In.which.year.s..does.the.training.take.place <- factor(staff_survey_responses$In.which.year.s..does.the.training.take.place , levels = c("First Year", "After the 1st Year", "Varies", "All", "N/A")) 
+
+
+plot_q_c_by_training <- ggplot( data = staff_survey_responses,
+                   mapping = aes (x = Training.Type , fill = In.which.year.s..does.the.training.take.place )) +
+  geom_bar(alpha = 0.8, color ="black") + #barcharts 
+  labs(title = "In which year does training take place?", x = "Answer", y = "Count", fill = "Answer") +  scale_fill_manual(values = c("deepskyblue","chartreuse",'azure4',"darkgoldenrod1","darkolivegreen"))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) +
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Public Engagement', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Technical Training', 'Wellbeing'))
+plot_q_c_by_training
+
+
+
+```
+
+
+
+## Mode of delivery
+
+- Varies: seminars/workshops/self-taught modules/Structured trainings/Others
+
+- Others e.g.:
+Wellbeing - context based
+Career development - industrial partners event that offer opportunities for industrial placement during PhD
+Continuous evaluation depending on the course type - e.g constant supervisory meetings/ yearly progress review/rolling courses through the PhD.
+
+- Trainings:
+Self-learning E-modules via University portals, structured training programmes with arranged trainers
+
+
+```{r}
+df = read_excel('staff_survey_mode_of_training.xlsx', sheet = "staff_survey_mode_of_training")
+df =df %>% gather(key = 'mode', value= 'frequency' ,Seminar:Workshops , na.rm = T)
+
+df %>% ggplot(mapping = aes(x = Course, y =frequency, fill = mode)) + geom_bar( stat = 'identity', alpha =.8, color ="black") +  scale_fill_manual(values = c('Seminar' ="deepskyblue",'Training'="chartreuse",'Varies'="azure4",'Workshops' ="darkgoldenrod1"))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + labs( y = "Count") +
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Public Engagement', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Technical Training', 'Wellbeing')) +
+  labs(title = "How is the training delivered?", x = "Answer", y = "Count", fill = "Answer")
+
+```
+
+## Duration of training
+
+- Varies:
+Personal development - continuous evaluation e.g., supervisory meetings or progress review meetings with the postgraduate team.
+E-modules: how long the student take 
+```{r}
+df = read_excel('staff_survey_mode_of_training.xlsx', sheet = "Time_PGS")
+df =df %>% gather(key = 'Time', value= 'frequency' ,2:7 , na.rm = T)
+
+df %>% ggplot(mapping = aes(x = Course, y =frequency, fill = Time)) + geom_bar( stat = 'identity',alpha = 0.8, color ="black") +  scale_fill_manual(values = c('0-1h' ="deepskyblue",'1-2h'="chartreuse",'2-3h'="darkolivegreen",'3-6h' ="darkgoldenrod1",'6-8h' = 'hotpink','Varies'= 'azure4'))  + theme_classic()  +  theme(axis.text.x = element_text(angle = 90),text=element_text(size = 12), axis.title.x = element_blank(),axis.line = element_line(size = 0.5, linetype = "dashed")) + labs( y = "duration per session") +
+  scale_x_discrete(labels=c('Career Dev.', 'Cohort-specific', 'Public Engagement', 'Equality and Diversity', 'Personal Dev.','Professional Dev.', 'Technical Training', 'Wellbeing'))  +
+  labs(title = "How long is the training per session?", x = "Answer", y = "Count", fill = "Answer")
+ 
+```
+
+
+
+
+
