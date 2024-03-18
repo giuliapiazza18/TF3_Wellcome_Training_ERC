@@ -1,5 +1,5 @@
 ---
-title: "Taskforce 3 Data Analysis Subgroup Report"
+title: "Taskforce 3 Data Analysis Subgroup Report - Review 2"
 author: "Laetitia, Giulia, John, Winfred"
 output: 
   html_document:
@@ -24,39 +24,49 @@ library(readxl)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(formatR)
+library(gt)
 ```
 
-```{r, message = FALSE}
+```{r, echo = FALSE, warning=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=30),tidy=TRUE)
+```
+
+```{r, message = FALSE, warning=FALSE}
 # Loading the data
-student_survey_responses <- as.data.frame(read_excel("Student survey-task-force-3.xlsx"))
-
+student_survey_responses <- as.data.frame(read_excel(
+    "/Users/giuliapiazza/Desktop/OneDrive - University College London/PhD/TC3_Wellcome/Student survey-task-force-3.xlsx"
+  ))
+y4 = which(student_survey_responses[6] == "Year 4") # remove a year 4 from dataset as suggested by reviewer
+student_survey_responses = student_survey_responses[-35,] 
 ```
 
-```{r, message = FALSE}
-student_survey_responses_q1_clean <-
-  na.omit(data.frame("Year" = as.factor(student_survey_responses[, 6])))
+```{r, message = FALSE, warning=FALSE}
+student_survey_responses_q1_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[, 6])))
 
-n_q1 <-
-  length(student_survey_responses_q1_clean[, 1]) #get the sample size for Q1
+n_q1 <- length(student_survey_responses_q1_clean[, 1]) #get the sample size for Q1
 
 
 plot_q1 <- ggplot(data = student_survey_responses_q1_clean,
                   mapping = aes (x = Year, fill = Year)) +
   geom_bar(color = "black") + #barcharts
   labs(
-    title = " Which year of your PhD are you in (n = 36) ?",
+    title = " Which year of your PhD are you in (n = 35) ?",
     x = "Answer",
     y = "Count",
     color = "Answer"
   ) + 
-  theme_classic() + theme(legend.position = "none") + scale_fill_brewer(palette = "Accent") + 
+  theme_classic() + 
+  theme(legend.position = "none") + 
+  scale_fill_brewer(palette = "Accent") + 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,18)
 
 q1_table = as.data.frame(table(student_survey_responses_q1_clean))
 names(q1_table) = c('Year', 'Count')
 
 plot_q1
-
+ggsave("Figure3_r2.eps", plot = plot_q1, width = 15.93, height = 11.38, units = "cm")
 ```
 
 ## Awareness of training
@@ -95,7 +105,8 @@ plot_q3_full <- ggplot(data = student_survey_responses_q3_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none", axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none", axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,20)
 
 plot_q3 <- ggplot(data = student_survey_responses_q3_clean,
@@ -107,7 +118,9 @@ plot_q3 <- ggplot(data = student_survey_responses_q3_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none", axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none", 
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,10)
 
 q3_table = student_survey_responses_q3_clean %>% group_by(Year, Q3) %>% summarise(count =
@@ -130,7 +143,8 @@ n_q2 <-
   length(student_survey_responses_q2_clean[, 1]) #get the sample size for Q2
 
 student_survey_responses_q2_clean$Q2 <-
-  factor(student_survey_responses_q2_clean$Q2, levels = c("Yes", "No")) #reorder the levels of Q2 in the way we want to present them "
+  factor(student_survey_responses_q2_clean$Q2, levels = c("Yes", "No")) 
+#reorder the levels of Q2 in the way we want to present them "
 
 plot_q2_full <- ggplot(data = student_survey_responses_q2_clean,
                   mapping = aes (x = Q2, fill = Q2)) +
@@ -140,7 +154,9 @@ plot_q2_full <- ggplot(data = student_survey_responses_q2_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,32)
 
 plot_q2 <- ggplot(data = student_survey_responses_q2_clean,
@@ -152,17 +168,21 @@ plot_q2 <- ggplot(data = student_survey_responses_q2_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,15)
 
 q2_table = student_survey_responses_q2_clean %>% group_by(Year, Q2) %>% summarise(count =
                                                                                     n())
 
 
-gridExtra::grid.arrange(plot_q2_full,
+Fig4 = gridExtra::grid.arrange(plot_q2_full,
                         plot_q2,
                         ncol = 2,
-                        top = "I know where to find information about the training offered (n = 36)")
+                        top = "I know where to find information about the training offered (n = 35)")
+
+ggsave("Figure4_r2.eps", plot = Fig4, width = 15.93, height = 11.28 , units = "cm")
 ```
 
 ```{r, message=FALSE}
@@ -176,7 +196,8 @@ n_q4 <-
   length(student_survey_responses_q4_clean[, 1]) #get the sample size for Q4
 
 student_survey_responses_q4_clean$Q4 <-
-  factor(student_survey_responses_q4_clean$Q4, levels = c("Yes", "No")) #reorder the levels of Q4 in the way we want to present them "
+  factor(student_survey_responses_q4_clean$Q4, levels = c("Yes", "No")) 
+#reorder the levels of Q4 in the way we want to present them "
 
 plot_q4_full <- ggplot(data = student_survey_responses_q4_clean,
                   mapping = aes (x = Q4, fill = Q4)) +
@@ -186,7 +207,9 @@ plot_q4_full <- ggplot(data = student_survey_responses_q4_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,32)
 
 plot_q4 <- ggplot(data = student_survey_responses_q4_clean,
@@ -198,7 +221,9 @@ plot_q4 <- ggplot(data = student_survey_responses_q4_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,13)
 
 q4_table = student_survey_responses_q4_clean %>% group_by(Year, Q4) %>% summarise(count =
@@ -221,7 +246,8 @@ n_q5 <-
   length(student_survey_responses_q5_clean[, 1]) #get the sample size for Q5
 
 student_survey_responses_q5_clean$Q5 <-
-  factor(student_survey_responses_q5_clean$Q5, levels = c("Yes", "No")) #reorder the levels of Q5 in the way we want to present them "
+  factor(student_survey_responses_q5_clean$Q5, levels = c("Yes", "No")) 
+#reorder the levels of Q5 in the way we want to present them "
 
 plot_q5_full <- ggplot(data = student_survey_responses_q5_clean,
                   mapping = aes (x = Q5, fill = Q5)) +
@@ -231,7 +257,9 @@ plot_q5_full <- ggplot(data = student_survey_responses_q5_clean,
        y = "Count",
        fill = "Answer")  +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,20)
 
 
@@ -244,7 +272,9 @@ plot_q5 <- ggplot(data = student_survey_responses_q5_clean,
        y = "Count",
        fill = "Answer")  +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,11)
 
 q5_table = student_survey_responses_q5_clean %>% group_by(Year, Q5) %>% summarise(count =
@@ -252,9 +282,10 @@ q5_table = student_survey_responses_q5_clean %>% group_by(Year, Q5) %>% summaris
 gridExtra::grid.arrange(plot_q5_full,
                         plot_q5,
                         ncol = 2,
-                        top = "My Wellcome trust programme made me aware of training opportunities (n = 36)")
+                        top = "My Wellcome trust programme made me aware of training opportunities (n = 35)")
 
 ```
+
 
 ## Scheduling of training
 
@@ -291,7 +322,9 @@ plot_q6_full <- ggplot(data = student_survey_responses_q6_clean,
   geom_bar(color = "black") + 
   labs(x = "Answer", y = "Count", fill = "Answer")  +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,22)
 
 plot_q6 <- ggplot(data = student_survey_responses_q6_clean,
@@ -300,16 +333,20 @@ plot_q6 <- ggplot(data = student_survey_responses_q6_clean,
   facet_wrap( ~ Year) + 
   labs(x = "Answer", y = "Count", fill = "Answer")  +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,10)
 
 q6_table = student_survey_responses_q6_clean %>% group_by(Year, Q6) %>% summarise(count =
                                                                                     n())
 
-gridExtra::grid.arrange(plot_q6_full,
+Fig5 = gridExtra::grid.arrange(plot_q6_full,
                         plot_q6,
                         ncol = 2,
-                        top = "The training is delivered at an appropriate time to provide me \n with the skills needed for my PhD project (n = 35)")
+  top = "The training is delivered at an appropriate time to provide me \n with the skills needed for my PhD project (n = 35)")
+
+ggsave("Figure5_r2.eps", plot = Fig5, width = 15.93, height = 11.28 , units = "cm")
 ```
 
 ```{r, message = FALSE}
@@ -323,7 +360,8 @@ n_q7 <-
   length(student_survey_responses_q7_clean[, 1]) #get the sample size for Q7
 
 student_survey_responses_q7_clean$Q7 <-
-  factor(student_survey_responses_q7_clean$Q7, levels = c("Yes", "No")) #reorder the levels of Q7 in the way we want to present them "
+  factor(student_survey_responses_q7_clean$Q7, levels = c("Yes", "No")) 
+#reorder the levels of Q7 in the way we want to present them "
 
 plot_q7_full <- ggplot(data = student_survey_responses_q7_clean,
                   mapping = aes (x = Q7, fill = Q7)) +
@@ -333,7 +371,9 @@ plot_q7_full <- ggplot(data = student_survey_responses_q7_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,22)
 
 plot_q7 <- ggplot(data = student_survey_responses_q7_clean,
@@ -345,7 +385,9 @@ plot_q7 <- ggplot(data = student_survey_responses_q7_clean,
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "none",
+        axis.title.x = element_blank())+ 
   geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,12)
 
 q7_table = student_survey_responses_q7_clean %>% group_by(Year, Q7) %>% summarise(count =
@@ -353,7 +395,7 @@ q7_table = student_survey_responses_q7_clean %>% group_by(Year, Q7) %>% summaris
 gridExtra::grid.arrange(plot_q7_full,
                         plot_q7,
                         ncol = 2,
-                        top = "Training was repeated to account for scheduling conflict (n = 33)")
+       top = "Training was repeated to account for scheduling conflict (n = 33)")
 
 ```
 
@@ -361,7 +403,7 @@ gridExtra::grid.arrange(plot_q7_full,
 
 Key points:
 
--   Most students did not receive training on equality and diversity; Those who did found it somewhat useful acaross years.
+-   Most students did not receive training on equality and diversity; Those who did found it somewhat useful across years.
 
 -   Most students found training in professional, personal, wellbeing, engagement and career development useful, though many did not receive training in these areas.
 
@@ -373,12 +415,22 @@ dat_studentupdated <- student_survey_responses %>% rename('yearofstudy'=6,'train
 ```
 
 ```{r, warning=FALSE, message=FALSE}
-student_survey_responses_q8b_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q8b" = as.factor(student_survey_responses[,13]))) 
+student_survey_responses_q8b_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q8b" = as.factor(student_survey_responses[, 13])
+  ))
 
-mylist = unlist(sapply(as.character(student_survey_responses_q8b_clean[,2]), strsplit,split =';', USE.NAMES = F)) # get all responses
-Val =c(levels(as.factor(mylist))) # get unique responses
-Q8b = student_survey_responses_q8b_clean %>% separate(Q8b, into = paste0("V", 1:8), sep = ";") # separate column of responses
+mylist = unlist(sapply(
+  as.character(student_survey_responses_q8b_clean[, 2]),
+  strsplit,
+  split = ';',
+  USE.NAMES = F
+)) # get all responses
+Val = c(levels(as.factor(mylist))) # get unique responses
+Q8b = student_survey_responses_q8b_clean %>% 
+  separate(Q8b, into = paste0("V", 1:8), sep = ";") 
+# separate column of responses
 
 Q8b[Q8b == ""] <- NA # set empty values as NA
 
@@ -386,52 +438,16 @@ Q8b[Q8b == ""] <- NA # set empty values as NA
 # wide to long
 qwide = gather(Q8b, V, Answer, V1:V8)
 qwide$Answer[qwide$Answer ==  "participatory research "] <- NA
-qfinal = subset(qwide, !is.na(qwide$Answer))
+qfinal = subset(qwide,!is.na(qwide$Answer))
 
 
-p1 = ggplot(qfinal, mapping = aes(x = Answer, fill = Answer)) + geom_bar(color="black") + # create a different plot for each Year
-  labs(title = "Overall", y = "Count", fill = "Answer") + scale_fill_brewer(palette = "Set3") + theme_classic() +   theme(legend.position = "none", axis.title.x = element_blank(), axis.text.x = element_blank(), title=element_text(size=8)) + 
-  geom_text(stat='count', aes(label=..count..), position = position_stack(vjust = 0.5), size = 2) 
-
-p2 = ggplot(qfinal, mapping = aes(x = as.factor(Answer), fill = as.factor(Answer))) + geom_bar(color="black") +  facet_wrap(~ Year) + # create a different plot for each Year
-  labs( y = "Count", fill = "Answer") + theme_classic() + theme(legend.position = "right", axis.title.x = element_blank(),
-                                                                axis.text.x = element_blank(),legend.text = element_text(size=7))+ 
-  geom_text(stat='count', aes(label=..count..), position = position_stack(vjust = 0.5), size = 2)+  scale_fill_brewer( palette = "Set3", labels=c("Career Development", 
-                                                                                                                              "Cohort Specifc Training",
-                                                                                                                              "Engagement and Outreach",
-                                                                                                                              "Equality and Diversity", 
-"No training in these areas",                                                                                                                              
-                                                                                                                              "Personal Development",
-                                                                                                                              "Professional Development", 
-                                                                                                                              "Technical Training", 
-                                                                                                                              "Wellbeing and Support")) 
-
-gridExtra::grid.arrange(p1,
-                        p2,
-                        ncol = 2,
-                        top = "I received training in these areas", 
-                       
-                        widths = c(1,3))
-```
-
-```{r, warning=FALSE, message=FALSE}
-student_survey_responses_q8a_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q8a" = as.factor(student_survey_responses[,22] ))) 
-
-Q8a = student_survey_responses_q8a_clean %>% separate(Q8a, into = paste0(1:8), sep = ";") # separate column of responses
-
-Q8b[Q8b == ""] <- NA # set empty values as NA
-
-
-# wide to long
-qawide = gather(Q8a, Rank, Answer, 2:9)
-
-
-p1 = ggplot(qawide, mapping = aes(fill = as.factor(Answer), x = as.factor(Rank))) + geom_bar(color =
-                                                                                               "black") +
-  labs(title = "Overall", y = "Count", fill = "Answer") + scale_fill_brewer(palette = "Set3") + theme_classic() + theme(
+p1 = ggplot(qfinal, mapping = aes(x = Answer, fill = Answer)) + geom_bar(color = "black") + 
+  # create a different plot for each Year
+  labs(title = "Overall", y = "Count", fill = "Answer") + scale_fill_brewer(palette = "Set3")+
+  theme_classic() +   theme(
     legend.position = "none",
     axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
     title = element_text(size = 8)
   ) +
   geom_text(
@@ -441,11 +457,15 @@ p1 = ggplot(qawide, mapping = aes(fill = as.factor(Answer), x = as.factor(Rank))
     size = 2
   )
 
-p2 = ggplot(qawide, mapping = aes(fill = as.factor(Answer), x = as.factor(Rank))) + geom_bar(color =
-                                                                                               "black") +  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(y = "Count", fill = "Answer") + theme_classic() + theme(
+p2 = ggplot(qfinal, mapping = aes(x = as.factor(Answer), 
+                                  fill = as.factor(Answer))) + 
+  geom_bar(color =                                                                                  "black") +  facet_wrap( ~ Year) + # create a different plot for each Year
+  labs(y = "Count", fill = "Answer") + 
+  theme_classic() + 
+  theme(
     legend.position = "right",
     axis.title.x = element_blank(),
+    axis.text.x = element_blank(),
     legend.text = element_text(size = 7)
   ) +
   geom_text(
@@ -454,238 +474,366 @@ p2 = ggplot(qawide, mapping = aes(fill = as.factor(Answer), x = as.factor(Rank))
     position = position_stack(vjust = 0.5),
     size = 2
   ) +  scale_fill_brewer(
+    palette = "Set3",
     labels = c(
       "Career Development",
       "Cohort Specifc Training",
       "Engagement and Outreach",
       "Equality and Diversity",
+      "No training in these areas",
       "Personal Development",
       "Professional Development",
       "Technical Training",
       "Wellbeing and Support"
-    ),
-    palette = "Set3"
+    )
   )
 
-gridExtra::grid.arrange(
-  p1,
-  p2,
-  ncol = 2,
-  top = "I found training in these areas most helpful:",
-  bottom = "Most to least prefered mode of training",
-  widths = c(1, 3)
+gridExtra::grid.arrange(p1,
+                        p2,
+                        ncol = 2,
+                        top = "I received training in these areas",
+                        
+                        widths = c(1, 3))
+```
+
+
+## Update figure 6 after reviewer comments
+
+```{r, warning=FALSE, message=FALSE}
+student_survey_responses_q8a_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q8a" = as.factor(student_survey_responses[, 22])
+  ))
+
+Q8a = student_survey_responses_q8a_clean %>% 
+  separate(Q8a, into = paste0(1:8), sep = ";") # separate column of responses
+
+Q8b[Q8b == ""] <- NA # set empty values as NA
+
+
+# wide to long
+qawide = gather(Q8a, Rank, Answer, 2:9)
+category_names = c(
+  `Career Development` = "Career Development",
+  `Cohort Specific Training` = "Cohort Specific Training",
+  `Engagement and Outreach (e.g., science communication)` = "Engagement and Outreach",
+   `Equality and Diversity` = "Equality and Diversity",
+  `Personal Development/ Management (e.g., time management, applying for funding, research integrity)` = "Personal Development",
+  `Professional Development (e.g., presenting or writing workshops)` = "Professional Development",
+  `Technical Training (e.g., using specific computer programmes)` = "Technical Training",
+  `Wellbeing and Support (e.g., mental health support)` = "Wellbeing and Support"
 )
+Fig6_r2 = ggplot(qawide, mapping = aes(x = as.factor(Rank), fill = Answer)) +
+  geom_bar(color ="black") +  
+  facet_wrap(~ Answer, labeller = as_labeller(category_names)) + # create a different plot for each Year
+  labs(y = "Count", fill = "Answer", x = "Most to least preferred mode of training",
+       title = "I found training in these areas most helpful") + theme_classic() + theme(
+    legend.position = "none",
+    legend.text = element_text(size = 7)
+  ) +
+  scale_fill_brewer(
+    palette = "Set3"
+  )
+Fig6_r2
+ggsave("Figure6_r2.eps", plot = Fig6_r2, width = 14, height = 18 , units = "cm")
 
 ```
 
 ```{r, message=FALSE}
-plot_q8_full <- ggplot(subset(dat_studentupdated, !is.na(equal_diversity)), aes(x=equal_diversity, fill = equal_diversity)) +
+plot_q8_full <-
+  ggplot(subset(dat_studentupdated,!is.na(equal_diversity)),
+         aes(x = equal_diversity, fill = equal_diversity)) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count") + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,18)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 18)
 
 
-plot_q8 <- ggplot(subset(dat_studentupdated, !is.na(equal_diversity)), aes(x=equal_diversity, fill = equal_diversity)) +
+plot_q8 <-
+  ggplot(subset(dat_studentupdated,!is.na(equal_diversity)),
+         aes(x = equal_diversity, fill = equal_diversity)) +
   geom_bar(color = "black") +
-  facet_wrap(~yearofstudy) +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,7)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 7)
 
 
 
-p_table <- subset(dat_studentupdated, !is.na(equal_diversity)) %>% 
-  group_by(equal_diversity,yearofstudy) %>% 
-  summarise(count=n()) %>% 
-  gridExtra::tableGrob(.,cols  = c("Usefulness", "Year", "Count"), rows = NULL)
+p_table <- subset(dat_studentupdated,!is.na(equal_diversity)) %>%
+  group_by(equal_diversity, yearofstudy) %>%
+  summarise(count = n()) %>%
+  gridExtra::tableGrob(.,
+                       cols  = c("Usefulness", "Year", "Count"),
+                       rows = NULL)
 
 
 gridExtra::grid.arrange(plot_q8_full,
                         plot_q8,
                         ncol = 2,
-                        top = "Usefulness of equality and diversity training")
+                        top = "Usefulness of equality and diversity training (n=32)")
 
 ```
 
 ```{r, message=FALSE}
-plot_q9_full <- ggplot(subset(dat_studentupdated, !is.na(professional_dev)),
-                       aes(x=professional_dev, fill = professional_dev)) +
+plot_q9_full <-
+  ggplot(
+    subset(dat_studentupdated,!is.na(professional_dev)),
+    aes(x = professional_dev, fill = professional_dev)
+  ) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,15)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 15)
 
 
-plot_q9 <- ggplot(subset(dat_studentupdated, !is.na(professional_dev)),
-                  aes(x=professional_dev, fill = professional_dev)) +
+plot_q9 <-
+  ggplot(
+    subset(dat_studentupdated,!is.na(professional_dev)),
+    aes(x = professional_dev, fill = professional_dev)
+  ) +
   geom_bar(color = "black") +
-  facet_wrap(~yearofstudy) +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,9)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 9)
 
 gridExtra::grid.arrange(plot_q9_full,
                         plot_q9,
                         ncol = 2,
-                        top = "Usefulness of professional development training")
+                        top = "Usefulness of professional development training (n=32)")
 
 
 ```
 
 ```{r, message=FALSE}
-plot_q10_full <- ggplot(subset(dat_studentupdated, !is.na(personal_dev)),
-                        aes(x=personal_dev, fill = personal_dev),) +
+plot_q10_full <-
+  ggplot(subset(dat_studentupdated,!is.na(personal_dev)),
+         aes(x = personal_dev, fill = personal_dev),
+  ) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count") + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,13)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 13)
 
 
-plot_q10 <- ggplot(subset(dat_studentupdated, !is.na(personal_dev)),
-                   aes(x=personal_dev, fill = personal_dev)) +
+plot_q10 <- ggplot(subset(dat_studentupdated,!is.na(personal_dev)),
+                   aes(x = personal_dev, fill = personal_dev)) +
   geom_bar(color = "black") +
-  facet_wrap(~yearofstudy) +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,6)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 6)
 
 gridExtra::grid.arrange(plot_q10_full,
                         plot_q10,
                         ncol = 2,
-                        top = "Usefulness of personal development training")
+                        top = "Usefulness of personal development training (n=30)")
 
 ```
 
 ```{r, message=FALSE}
-plot_q11_full <- ggplot(subset(dat_studentupdated, !is.na(wellbeing)),
-                        aes(x=wellbeing, fill = wellbeing)) +
-  geom_bar(position ='dodge', color = "black") +
+plot_q11_full <-
+  ggplot(subset(dat_studentupdated,!is.na(wellbeing)),
+         aes(x = wellbeing, fill = wellbeing)) +
+  geom_bar(position = 'dodge', color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,15)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 15)
 
 
-plot_q11 <- ggplot(subset(dat_studentupdated, !is.na(wellbeing)), 
-                   aes(x=wellbeing, fill = wellbeing)) +
-  geom_bar(position ='dodge',color = "black") +
-  facet_wrap(~yearofstudy) +
+plot_q11 <- ggplot(subset(dat_studentupdated,!is.na(wellbeing)),
+                   aes(x = wellbeing, fill = wellbeing)) +
+  geom_bar(position = 'dodge', color = "black") +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,8)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 8)
 
 gridExtra::grid.arrange(plot_q11_full,
                         plot_q11,
                         ncol = 2,
-                        top = "Usefulness of personal development training")
+                        top = "Usefulness of personal development training (n=32)")
 ```
 
 ```{r, message=FALSE}
-plot_q12_full <- ggplot(subset(dat_studentupdated, !is.na(career_dev)),
-                        aes(x=career_dev, fill = career_dev)) +
+plot_q12_full <-
+  ggplot(subset(dat_studentupdated,!is.na(career_dev)),
+         aes(x = career_dev, fill = career_dev)) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,18)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 18)
 
 
-plot_q12 <- ggplot(subset(dat_studentupdated, !is.na(career_dev)),
-                   aes(x=career_dev, fill = career_dev)) +
-  geom_bar(position ='dodge',color = "black") +
-  facet_wrap(~yearofstudy) +
+plot_q12 <- ggplot(subset(dat_studentupdated,!is.na(career_dev)),
+                   aes(x = career_dev, fill = career_dev)) +
+  geom_bar(position = 'dodge', color = "black") +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,8)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 8)
 
 gridExtra::grid.arrange(plot_q12_full,
                         plot_q12,
                         ncol = 2,
-                        top = "Usefulness of career development training")
+                        top = "Usefulness of career development training (n=30)")
 ```
 
 ```{r, message=FALSE}
-plot_q13_full <- ggplot(subset(dat_studentupdated, !is.na(tech_training)),
-                        aes(x=tech_training, fill = tech_training)) +
-  geom_bar(position ='dodge', color = "black") +
+plot_q13_full <-
+  ggplot(subset(dat_studentupdated,!is.na(tech_training)),
+         aes(x = tech_training, fill = tech_training)) +
+  geom_bar(position = 'dodge', color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,17)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 17)
 
 
-plot_q13 <- ggplot(subset(dat_studentupdated, !is.na(tech_training)),
-                   aes(x=tech_training, fill = tech_training)) +
-  geom_bar(position ='dodge',color = "black") +
-  facet_wrap(~yearofstudy) +
+plot_q13 <-
+  ggplot(subset(dat_studentupdated,!is.na(tech_training)),
+         aes(x = tech_training, fill = tech_training)) +
+  geom_bar(position = 'dodge', color = "black") +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,8)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 8)
 
 gridExtra::grid.arrange(plot_q13_full,
                         plot_q13,
                         ncol = 2,
-                        top = "Usefulness of technical training")
+                        top = "Usefulness of technical training (n=32)")
 ```
 
 ```{r, message=FALSE}
-plot_q14_full <- ggplot(subset(dat_studentupdated, !is.na(cohort_training)),
-                        aes(x=cohort_training, fill = cohort_training)) +
+plot_q14_full <-
+  ggplot(subset(dat_studentupdated,!is.na(cohort_training)),
+         aes(x = cohort_training, fill = cohort_training)) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,15)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 15)
 
 
-plot_q14 <- ggplot(subset(dat_studentupdated, !is.na(cohort_training)),
-                   aes(x=cohort_training, fill = cohort_training)) +
+plot_q14 <-
+  ggplot(subset(dat_studentupdated,!is.na(cohort_training)),
+         aes(x = cohort_training, fill = cohort_training)) +
   geom_bar(color = "black") +
-  facet_wrap(~yearofstudy) +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,7)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 7)
 
 gridExtra::grid.arrange(plot_q14_full,
                         plot_q14,
                         ncol = 2,
-                        top = "Usefulness of cohort-specific training")
+                        top = "Usefulness of cohort-specific training (n=32)")
 ```
 
 ```{r, message=FALSE}
-plot_q15_full <- ggplot(subset(dat_studentupdated, !is.na(engage_outreach)),
-                        aes(x=engage_outreach, fill = engage_outreach)) +
+plot_q15_full <-
+  ggplot(subset(dat_studentupdated,!is.na(engage_outreach)),
+         aes(x = engage_outreach, fill = engage_outreach)) +
   geom_bar(color = "black") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,14)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 14)
 
 
-plot_q15 <- ggplot(subset(dat_studentupdated, !is.na(engage_outreach)),
-                   aes(x=engage_outreach, fill = engage_outreach)) +
-  geom_bar(position ='dodge',color = "black") +
-  facet_wrap(~yearofstudy) +
+plot_q15 <-
+  ggplot(subset(dat_studentupdated,!is.na(engage_outreach)),
+         aes(x = engage_outreach, fill = engage_outreach)) +
+  geom_bar(position = 'dodge', color = "black") +
+  facet_wrap( ~ yearofstudy) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+
-  labs(y = "Count")+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,7)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  labs(y = "Count") +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 7)
 
 gridExtra::grid.arrange(plot_q15_full,
                         plot_q15,
                         ncol = 2,
-                        top = "Usefulness of engaging and outreach training")
+                        top = "Usefulness of engaging and outreach training (n=32)")
 ```
 
 Data for the following question was looked at and grouped into the following variable manually due to its free-text nature (Distribution of answers : NA / Yes (including detailed comments) / No)
@@ -693,46 +841,75 @@ Data for the following question was looked at and grouped into the following var
 Out of the "Yes" answers, n=2 were just "Yes" and n=11 gave detailed answers. Out of these 11 answers : - 3 mentioned issues related to their well being, including struggles with "loneliness" and "self-doubt" - 6 mentioned issues related to academia / PhD-specific, including struggles with selecting a supervisor, project management and grant applications - 4 mentioned issues related to their career beyond research skills, including struggles with networking, planning post their PhD and managing their finances (2) (Some answers included multiple different points)
 
 ```{r, message = FALSE}
-student_survey_responses_q18 <- data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q18" = as.factor(student_survey_responses[,23] ))
+student_survey_responses_q18 <-
+  data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q18" = as.factor(student_survey_responses[, 23])
+  )
 
-student_survey_responses_q18_clean <- data.frame("Q18" = c(rep("Not answered",20), rep("Yes",2), rep("No",3), rep("Yes", 11)),
-                                                 "Year" = c(rep("Year 1", 4), rep("Year 2", 9), rep("Year 3", 6), rep("Year 4", 1),
-                                                             rep("Year 1", 1), rep("Year 2", 1), rep("Year 2", 2), rep("Year 3", 1),
-                                                             rep("Year 1", 4), rep("Year 2", 3), rep("Year 3", 4)))
-      
-student_survey_responses_q18_clean$Q18 <- factor(student_survey_responses_q18_clean$Q18, levels = c("Yes", "No", "Not answered")) #reorder the levels of Q7 in the way we want to present them "
-                                                                                                                                  
+student_survey_responses_q18_clean <-
+  data.frame(
+    "Q18" = c(
+      rep("Not answered", 19),
+      rep("Yes", 2),
+      rep("No", 3),
+      rep("Yes", 11)
+    ),
+    "Year" = c(
+      rep("Year 1", 4),
+      rep("Year 2", 9),
+      rep("Year 3", 6),
+      rep("Year 1", 1),
+      rep("Year 2", 1),
+      rep("Year 2", 2),
+      rep("Year 3", 1),
+      rep("Year 1", 4),
+      rep("Year 2", 3),
+      rep("Year 3", 4)
+    )
+  )
+
+student_survey_responses_q18_clean$Q18 <-
+  factor(student_survey_responses_q18_clean$Q18,
+         levels = c("Yes", "No", "Not answered")) 
+#reorder the levels of Q7 in the way we want to present them "
+
 
 plot_q18_full <- ggplot(data = student_survey_responses_q18_clean,
-                  mapping = aes (x = Q18, fill = Q18)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q18, fill = Q18)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,22)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 22)
 
 plot_q18 <- ggplot(data = student_survey_responses_q18_clean,
-                  mapping = aes (x = Q18, fill = Q18)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q18, fill = Q18)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,11)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 11)
 
-q18_table = student_survey_responses_q18_clean %>% group_by(Year, Q18) %>% summarise(count =
-                                                                                    n())
+q18_table = student_survey_responses_q18_clean %>% group_by(Year, Q18) %>% 
+  summarise(count =n())
 gridExtra::grid.arrange(plot_q18_full,
                         plot_q18,
                         ncol = 2,
-                        top = "Are there any aspects of the PhD project or \nlife as a PhD student you do not feel equipped to manage? (n = 36)")
+                        top = "Are there any aspects of the PhD project or \nlife as a PhD student you do not feel equipped to manage? (n = 35)")
 ```
 
 ## Format of training
@@ -749,202 +926,308 @@ Key points:
 
 -   Training was considered a good use of time and resources
 
+
 ```{r, message = FALSE}
-student_open <- as.data.frame(read_xlsx("student_open.xlsx"))                                                                     
-student_open$Year = student_open[,2]
+student_open <-
+  as.data.frame(read_xlsx("/Users/giuliapiazza/Desktop/OneDrive - University College London/PhD/TC3_Wellcome/student_open.xlsx"))
+student_open$Year = student_open[, 2]
 
-plot_q19 <- ggplot(data = subset(student_open, !is.na(training_like)),
-                   mapping = aes (x = training_like, fill = training_like)) +
+plot_q19 <-
+  ggplot(
+    data = subset(student_open,!is.na(training_like)),
+    mapping = aes (x = training_like, fill = training_like)
+  ) +
   geom_bar(color = "black") + #barcharts
-  facet_wrap(~ Year) + # create a different plot for each Year
+  facet_wrap( ~ Year) + # create a different plot for each Year
   labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
+  theme(axis.text.x = element_blank()) +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,6)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 6)
 
-plot_q19_full <- ggplot(data = subset(student_open, !is.na(training_like)),
-                   mapping = aes (x = training_like, fill = training_like)) +
+plot_q19_full <-
+  ggplot(
+    data = subset(student_open,!is.na(training_like)),
+    mapping = aes (x = training_like, fill = training_like)
+  ) +
   geom_bar(color = "black") +
   labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
+  theme(axis.text.x = element_blank()) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,9)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 9)
 
 gridExtra::grid.arrange(plot_q19_full,
                         plot_q19,
                         ncol = 2,
-                        top = "What training would you like to be offered?")
+                        top = "What training would you like to be offered? (n=35)")
 ```
 
+## Update figure 8 after review
 ```{r, message=FALSE}
-student_survey_responses_q21_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q22" = as.factor(student_survey_responses[,26] ))) 
-n_q21 <- length(student_survey_responses_q21_clean[,1]) #get the sample size for Q21
+student_survey_responses_q21_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q22" = as.factor(student_survey_responses[, 26])
+  ))
+n_q21 <-
+  length(student_survey_responses_q21_clean[, 1]) #get the sample size for Q21
 
 
-mylist = unlist(sapply(as.character(student_survey_responses_q21_clean[,2]), strsplit,split =';', USE.NAMES = F)) # get all responses
-Val =c(levels(as.factor(mylist))) # get unique responses
+mylist = unlist(sapply(
+  as.character(student_survey_responses_q21_clean[, 2]),
+  strsplit,
+  split = ';',
+  USE.NAMES = F
+)) # get all responses
+Val = c(levels(as.factor(mylist))) # get unique responses
 
-df1 = student_survey_responses_q21_clean %>% filter(Year == 'Year 1') ;df2 = student_survey_responses_q21_clean %>% filter(Year == 'Year 2') ; df3 = student_survey_responses_q21_clean %>% filter(Year == 'Year 3') 
+df1 = student_survey_responses_q21_clean %>% filter(Year == 'Year 1')
+df2 = student_survey_responses_q21_clean %>% filter(Year == 'Year 2')
+df3 = student_survey_responses_q21_clean %>% filter(Year == 'Year 3')
 
-Var = list(df1,df2,df3) # create list of dfs.
-names(Var) <- c('Year1','Year2','Year3') # name the data frames for each year responses
+Var = list(df1, df2, df3) # create list of dfs.
+names(Var) <-
+  c('Year1', 'Year2', 'Year3') # name the data frames for each year responses
 
-cat("pref","mode","Year",file="Testfile.txt",sep=",",fill = TRUE) ##create  a log file to append indices for each response 
-Ind = function(x){ 
+cat("pref",
+    "mode",
+    "Year",
+    file = "Testfile.txt",
+    sep = ",",
+    fill = TRUE) ##create  a log file to append indices for each response
+Ind = function(x) {
   for (i in 1:length(Var)) {
     year = (names(Var)[i])
-    LIST = sapply(as.character(Var[[i]][[2]]), strsplit,split =';', USE.NAMES = F)
+    LIST = sapply(as.character(Var[[i]][[2]]),
+                  strsplit,
+                  split = ';',
+                  USE.NAMES = F)
     for (l in LIST) {
-      cat(which( l == x),x,year,file="Testfile.txt",sep = ",",fill = TRUE, append = TRUE) # write data to log fie
+      cat(
+        which(l == x),
+        x,
+        year,
+        file = "Testfile.txt",
+        sep = ",",
+        fill = TRUE,
+        append = TRUE
+      ) # write data to log fie
     }
   }
   
   
 }
-Val = sapply(Val,Ind,USE.NAMES = F)
-plot_q22 = read.table('Testfile.txt',header = T, sep = ',')
+Val = sapply(Val, Ind, USE.NAMES = F)
+plot_q22 = read.table('Testfile.txt', header = T, sep = ',')
 
-p1 = ggplot(plot_q22, mapping = aes(fill = as.factor(mode),x = as.factor(pref))) + geom_bar(color="black") + # create a different plot for each Year
-  labs(title = "Overall", y = "Count", fill = "Answer") + scale_fill_brewer(palette = "Set3") + theme_classic() + theme(legend.position = "none", axis.title.x = element_blank(), title=element_text(size=8)) + 
-  geom_text(stat='count', aes(label=..count..), position = position_stack(vjust = 0.5), size = 2) 
+Fig8_r2 = ggplot(plot_q22, mapping = aes(fill = as.factor(mode), x = as.factor(pref))) +
+  geom_bar(color ="black") +
+  facet_wrap(~ mode) + # create a different plot for each mode
+  labs(title = "I most enjoy training delivered as (n=31)", y = "Count", fill = "Answer",
+       x = "Most to least preferred mode of delivery") + 
+  scale_fill_brewer(palette = "Set3") + theme_classic() + theme(
+    legend.position = "none",
+    axis.title.x = element_text(size=12),
+    title = element_text(size = 10)
+  ) 
 
-p2 = ggplot(plot_q22, mapping = aes(fill = as.factor(mode),x = as.factor(pref))) + geom_bar(color="black") +  facet_wrap(~ Year) + # create a different plot for each Year
-  labs( y = "Count", fill = "Answer") + scale_fill_brewer(palette = "Set3") + theme_classic() + theme(legend.position = "right", axis.title.x = element_blank(), legend.text = element_text(size=7))+ 
-  geom_text(stat='count', aes(label=..count..), position = position_stack(vjust = 0.5), size = 2) 
 
-gridExtra::grid.arrange(p1,
-                        p2,
-                        ncol = 2,
-                        top = "I most enjoyed training delivered as (n = 31)", 
-                        bottom = "Most to least prefered mode of training",
-                        widths = c(1,3))
+Fig8_r2
+ggsave("Figure8_r2.eps", plot = Fig8_r2, width = 16, height = 18 , units = "cm")
+
 ```
 
 ```{r, message = FALSE}
-student_survey_responses_q22_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q22" = as.factor(student_survey_responses[,27] ))) #create a dataframe with Q1 and Q22 and remove NA values in answers to Q22
+student_survey_responses_q22_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q22" = as.factor(student_survey_responses[, 27])
+  )) #create a dataframe with Q1 and Q22 and remove NA values in answers to Q22
 
-n_q22 <- length(student_survey_responses_q22_clean[,1]) #get the sample size for Q22
+n_q22 <-
+  length(student_survey_responses_q22_clean[, 1]) #get the sample size for Q22
 
-student_survey_responses_q22_clean$Q22 <- factor(student_survey_responses_q22_clean$Q22, levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree", "Not applicable")) #reorder the levels of Q22 in the way we want to present them 
+student_survey_responses_q22_clean$Q22 <-
+  factor(
+    student_survey_responses_q22_clean$Q22,
+    levels = c(
+      "Strongly agree",
+      "Agree",
+      "Disagree",
+      "Strongly disagree",
+      "Not applicable"
+    )
+  ) #reorder the levels of Q22 in the way we want to present them
 
 
 
 plot_q22_full <- ggplot(data = student_survey_responses_q22_clean,
-                  mapping = aes (x = Q22, fill = Q22)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q22, fill = Q22)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q22 <- ggplot(data = student_survey_responses_q22_clean,
-                  mapping = aes (x = Q22, fill = Q22)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q22, fill = Q22)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,11)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 11)
 
 q22_table = student_survey_responses_q22_clean %>% group_by(Year, Q22) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q22_full,
                         plot_q22,
                         ncol = 2,
-                        top = "I feel the format of the training is generally appropriate to \nthe subject matter (n = 33)")
+  top = "I feel the format of the training is generally appropriate to \nthe subject matter (n = 33)")
 
 ```
 
 ```{r, message= FALSE}
-student_survey_responses_q23_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q23" = as.factor(student_survey_responses[,28] ))) #create a dataframe with Q1 and Q23 and remove NA values in answers to Q23
+student_survey_responses_q23_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q23" = as.factor(student_survey_responses[, 28])
+  )) #create a dataframe with Q1 and Q23 and remove NA values in answers to Q23
 
-n_q23 <- length(student_survey_responses_q23_clean[,1]) #get the sample size for Q23
+n_q23 <-
+  length(student_survey_responses_q23_clean[, 1]) #get the sample size for Q23
 
-student_survey_responses_q23_clean$Q23 <- factor(student_survey_responses_q23_clean$Q23, levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree", "Not applicable")) #reorder the levels of Q23 in the way we want to present them 
+student_survey_responses_q23_clean$Q23 <-
+  factor(
+    student_survey_responses_q23_clean$Q23,
+    levels = c(
+      "Strongly agree",
+      "Agree",
+      "Disagree",
+      "Strongly disagree",
+      "Not applicable"
+    )
+  ) #reorder the levels of Q23 in the way we want to present them
 
 
 plot_q23_full <- ggplot(data = student_survey_responses_q23_clean,
-                  mapping = aes (x = Q23, fill = Q23)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q23, fill = Q23)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q23 <- ggplot(data = student_survey_responses_q23_clean,
-                  mapping = aes (x = Q23, fill = Q23)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q23, fill = Q23)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,8)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 8)
 
-q23_table = student_survey_responses_q23_clean %>% group_by(Year, Q23) %>% summarise(count =
-                                                                                    n())
+q23_table = student_survey_responses_q23_clean %>% group_by(Year, Q23) %>% 
+  summarise(count =
+                                                                                       n())
 gridExtra::grid.arrange(plot_q23_full,
                         plot_q23,
                         ncol = 2,
-                        top = "Training offered by my programme is compulsory (n = 33)")
+  top = "Training offered by my programme is compulsory (n = 33)")
 
 ```
 
 ```{r, message=FALSE}
-student_survey_responses_q24_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q24" = as.factor(student_survey_responses[,29] ))) #create a dataframe with Q1 and Q24 and remove NA values in answers to Q24
+student_survey_responses_q24_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q24" = as.factor(student_survey_responses[, 29])
+  )) #create a dataframe with Q1 and Q24 and remove NA values in answers to Q24
 
-n_q24 <- length(student_survey_responses_q24_clean[,1]) #get the sample size for Q24
+n_q24 <-
+  length(student_survey_responses_q24_clean[, 1]) #get the sample size for Q24
 
-student_survey_responses_q24_clean$Q24 <- factor(student_survey_responses_q24_clean$Q24, levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree", "Not applicable")) #reorder the levels of Q24 in the way we want to present them 
+student_survey_responses_q24_clean$Q24 <-
+  factor(
+    student_survey_responses_q24_clean$Q24,
+    levels = c(
+      "Strongly agree",
+      "Agree",
+      "Disagree",
+      "Strongly disagree",
+      "Not applicable"
+    )
+  ) #reorder the levels of Q24 in the way we want to present them
 
 
 plot_q24_full <- ggplot(data = student_survey_responses_q24_clean,
-                  mapping = aes (x = Q24, fill = Q24)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q24, fill = Q24)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q24 <- ggplot(data = student_survey_responses_q24_clean,
-                  mapping = aes (x = Q24, fill = Q24)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q24, fill = Q24)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,10)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 10)
 
 q24_table = student_survey_responses_q24_clean %>% group_by(Year, Q24) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q24_full,
                         plot_q24,
                         ncol = 2,
                         top = "Training offered by my programme is compulsory (n = 33)")
-
 
 ```
 
@@ -956,69 +1239,98 @@ gridExtra::grid.arrange(plot_q24_full,
 
 ```{r}
 
-plot_q25b <- ggplot(data = subset(student_open, !is.na(training_useful)),
-                   mapping = aes (x = training_useful, fill = training_useful)) +
-  geom_bar(color = "black") + #barcharts
-  facet_wrap(~ Year) + # create a different plot for each Year
-  labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
-  scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,7)
 
-plot_q25b_full <- ggplot(data = subset(student_open, !is.na(training_useful)),
-                   mapping = aes (x = training_useful, fill = training_useful)) +
+plot_q25b <-
+  ggplot(
+    data = subset(student_open,!is.na(training_useful)),
+    mapping = aes (x = training_useful, fill = training_useful)
+  ) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap( ~ Year) + # create a different plot for each Year
+  labs(x = "Answer", y = "Count", fill = "Answer") +
+  theme(axis.text.x = element_blank()) +
+  scale_fill_brewer(palette = "Paired") + theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 7)
+
+plot_q25b_full <-
+  ggplot(
+    data = subset(student_open,!is.na(training_useful)),
+    mapping = aes (x = training_useful, fill = training_useful)
+  ) +
   geom_bar(color = "black") +
   labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
+  theme(axis.text.x = element_blank()) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
-gridExtra::grid.arrange(plot_q25b_full,
+Fig7 = gridExtra::grid.arrange(plot_q25b_full,
                         plot_q25b,
                         ncol = 2,
-                        top = "What training modules did you find most useful?")
+                        top = "What training modules did you find most useful (n = 30)?")
+
+ggsave("Figure7.eps", plot = Fig7, width = 15.93, height = 11.28 , units = "cm")
 ```
 
 ```{r, message= FALSE}
-student_survey_responses_q26_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q26" = as.factor(student_survey_responses[,31] ))) #create a dataframe with Q1 and Q26 and remove NA values in answers to Q26
+student_survey_responses_q26_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q26" = as.factor(student_survey_responses[, 31])
+  )) #create a dataframe with Q1 and Q26 and remove NA values in answers to Q26
 
-n_q26 <- length(student_survey_responses_q26_clean[,1]) #get the sample size for Q26
+n_q26 <-
+  length(student_survey_responses_q26_clean[, 1]) #get the sample size for Q26
 
-student_survey_responses_q26_clean$Q26 <- factor(student_survey_responses_q26_clean$Q26, levels = c("Yes", "No")) #reorder the levels of Q26 in the way we want to present them "
+student_survey_responses_q26_clean$Q26 <-
+  factor(student_survey_responses_q26_clean$Q26, levels = c("Yes", "No")) 
+#reorder the levels of Q26 in the way we want to present them "
 
 
 plot_q26_full <- ggplot(data = student_survey_responses_q26_clean,
-                  mapping = aes (x = Q26, fill = Q26)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q26, fill = Q26)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q26 <- ggplot(data = student_survey_responses_q26_clean,
-                  mapping = aes (x = Q26, fill = Q26)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q26, fill = Q26)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,9)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 9)
 
 q26_table = student_survey_responses_q26_clean %>% group_by(Year, Q26) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q26_full,
                         plot_q26,
                         ncol = 2,
-                        top = "I have used skills learned in personal development training during \nthe course of my PhD so far (n = 32)")
+    top = "I have used skills learned in personal development training during \nthe course of my PhD so far (n = 32)")
 
 ```
 
@@ -1031,39 +1343,51 @@ Key points:
 -   Students know how to access the records
 
 ```{r, message  = FALSE}
-student_survey_responses_q27_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q27" = as.factor(student_survey_responses[,32] ))) #create a dataframe with Q1 and Q27 and remove NA values in answers to Q27
+student_survey_responses_q27_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q27" = as.factor(student_survey_responses[, 32])
+  )) #create a dataframe with Q1 and Q27 and remove NA values in answers to Q27
 
-n_q27 <- length(student_survey_responses_q27_clean[,1]) #get the sample size for Q27
+n_q27 <-
+  length(student_survey_responses_q27_clean[, 1]) #get the sample size for Q27
 
-student_survey_responses_q27_clean$Q27 <- factor(student_survey_responses_q27_clean$Q27, levels = c("Yes", "No")) #reorder the levels of Q27 in the way we want to present them "
+student_survey_responses_q27_clean$Q27 <-
+  factor(student_survey_responses_q27_clean$Q27, levels = c("Yes", "No")) 
+#reorder the levels of Q27 in the way we want to present them "
 
 
 plot_q27_full <- ggplot(data = student_survey_responses_q27_clean,
-                  mapping = aes (x = Q27, fill = Q27)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q27, fill = Q27)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,28)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 28)
 
 plot_q27 <- ggplot(data = student_survey_responses_q27_clean,
-                  mapping = aes (x = Q27, fill = Q27)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q27, fill = Q27)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,10)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 10)
 
 q27_table = student_survey_responses_q27_clean %>% group_by(Year, Q27) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q27_full,
                         plot_q27,
                         ncol = 2,
@@ -1071,44 +1395,74 @@ gridExtra::grid.arrange(plot_q27_full,
 ```
 
 ```{r, message= FALSE}
-student_survey_responses_q28_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q28" = as.factor(student_survey_responses[,33] ))) #create a dataframe with Q1 and Q28 and remove NA values in answers to Q28
+student_survey_responses_q28_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q28" = as.factor(student_survey_responses[, 33])
+  )) #create a dataframe with Q1 and Q28 and remove NA values in answers to Q28
 
-n_q28 <- length(student_survey_responses_q28_clean[,1]) #get the sample size for Q28
+n_q28 <-
+  length(student_survey_responses_q28_clean[, 1]) #get the sample size for Q28
 
-student_survey_responses_q28_clean$Q28 <- factor(student_survey_responses_q28_clean$Q28, levels = c("Yes", "No", "N/A - my university does not provide a way to record my training.")) #reorder the levels of Q28 in the way we want to present them "
+student_survey_responses_q28_clean$Q28 <-
+  factor(
+    student_survey_responses_q28_clean$Q28,
+    levels = c(
+      "Yes",
+      "No",
+      "N/A - my university does not provide a way to record my training."
+    )
+  ) #reorder the levels of Q28 in the way we want to present them "
 
 plot_q28_full <- ggplot(data = student_survey_responses_q28_clean,
-                  mapping = aes (x = Q28, fill = Q28)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q28, fill = Q28)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  scale_x_discrete(labels=c("Yes" = "Yes", "No" = "No", "N/A - my university does not provide a way to record my training." = "Record not provided")) + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Yes" = "Yes",
+      "No" = "No",
+      "N/A - my university does not provide a way to record my training." = "Record not provided"
+    )
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q28 <- ggplot(data = student_survey_responses_q28_clean,
-                  mapping = aes (x = Q28, fill = Q28)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q28, fill = Q28)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) +
-  scale_x_discrete(labels=c("Yes" = "Yes", "No" = "No", "N/A - my university does not provide a way to record my training." = "Record not provided"))+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,10)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  scale_x_discrete(
+    labels = c(
+      "Yes" = "Yes",
+      "No" = "No",
+      "N/A - my university does not provide a way to record my training." = "Record not provided"
+    )
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 10)
 
 q28_table = student_survey_responses_q28_clean %>% group_by(Year, Q28) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q28_full,
                         plot_q28,
                         ncol = 2,
-                        top = "I know how to access and record training \nin the training log provided by my university (n = 32)")
+ top = "I know how to access and record training \nin the training log provided by my university (n = 32)")
 
 ```
 
@@ -1123,84 +1477,118 @@ Key points:
 -   Most students wanted to learn new skills relevant to their PhDs when engaging in training
 
 ```{r, message = FALSE}
-student_survey_responses_q29_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q29" = as.factor(student_survey_responses[,34] ))) #create a dataframe with Q1 and Q29 and remove NA values in answers to Q29
+student_survey_responses_q29_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q29" = as.factor(student_survey_responses[, 34])
+  )) #create a dataframe with Q1 and Q29 and remove NA values in answers to Q29
 
-n_q29 <- length(student_survey_responses_q29_clean[,1]) #get the sample size for Q29
+n_q29 <-
+  length(student_survey_responses_q29_clean[, 1]) #get the sample size for Q29
 
-student_survey_responses_q29_clean$Q29 <- factor(student_survey_responses_q29_clean$Q29, levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree", "Not applicable")) #reorder the levels of Q29 in the way we want to present them 
+student_survey_responses_q29_clean$Q29 <-
+  factor(
+    student_survey_responses_q29_clean$Q29,
+    levels = c(
+      "Strongly agree",
+      "Agree",
+      "Disagree",
+      "Strongly disagree",
+      "Not applicable"
+    )
+  ) #reorder the levels of Q29 in the way we want to present them
 
 
 plot_q29_full <- ggplot(data = student_survey_responses_q29_clean,
-                  mapping = aes (x = Q29, fill = Q29)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q29, fill = Q29)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank()) + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 plot_q29 <- ggplot(data = student_survey_responses_q29_clean,
-                  mapping = aes (x = Q29, fill = Q29)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q29, fill = Q29)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,12)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 12)
 
 q29_table = student_survey_responses_q29_clean %>% group_by(Year, Q29) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q29_full,
                         plot_q29,
                         ncol = 2,
-                        top = "Training provided as part of my programme prepares me \nto become a good researcher (n = 32)")
+top = "Training provided as part of my programme prepares me \nto become a good researcher (n = 32)")
 
 ```
 
 ```{r, message = FALSE}
-student_survey_responses_q30_clean <- na.omit(data.frame("Year" = as.factor(student_survey_responses[,6]), 
-                                          "Q30" = as.factor(student_survey_responses[,35] ))) #create a dataframe with Q1 and Q30 and remove NA values in answers to Q30
+student_survey_responses_q30_clean <-
+  na.omit(data.frame(
+    "Year" = as.factor(student_survey_responses[, 6]),
+    "Q30" = as.factor(student_survey_responses[, 35])
+  )) #create a dataframe with Q1 and Q30 and remove NA values in answers to Q30
 
-n_q30 <- length(student_survey_responses_q30_clean[,1]) #get the sample size for Q30
+n_q30 <-
+  length(student_survey_responses_q30_clean[, 1]) #get the sample size for Q30
 
-student_survey_responses_q30_clean$Q30 <- factor(student_survey_responses_q30_clean$Q30, levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree")) #reorder the levels of Q30 in the way we want to present them 
+student_survey_responses_q30_clean$Q30 <-
+  factor(
+    student_survey_responses_q30_clean$Q30,
+    levels = c("Strongly agree", "Agree", "Disagree", "Strongly disagree")
+  ) #reorder the levels of Q30 in the way we want to present them
 
 
 plot_q30_full <- ggplot(data = student_survey_responses_q30_clean,
-                  mapping = aes (x = Q30, fill = Q30)) +
-  geom_bar(color= "black") + 
-  labs(
-       x = "Answer",
+                        mapping = aes (x = Q30, fill = Q30)) +
+  geom_bar(color = "black") +
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Accent") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,20)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 20)
 
 plot_q30 <- ggplot(data = student_survey_responses_q30_clean,
-                  mapping = aes (x = Q30, fill = Q30)) +
-  geom_bar(color= "black") + #barcharts
-  facet_wrap( ~ Year) + # create a different plot for each Year
-  labs(
-       x = "Answer",
+                   mapping = aes (x = Q30, fill = Q30)) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap(~ Year) + # create a different plot for each Year
+  labs(x = "Answer",
        y = "Count",
        fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,9)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 9)
 
 q30_table = student_survey_responses_q30_clean %>% group_by(Year, Q30) %>% summarise(count =
-                                                                                    n())
+                                                                                       n())
 gridExtra::grid.arrange(plot_q30_full,
                         plot_q30,
                         ncol = 2,
-                        top = "Training provided as part of my programme gives me valuable \ntransferable skills for working outside of academia (n = 32)")
+ top = "Training provided as part of my programme gives me valuable \ntransferable skills for working outside of academia (n = 32)")
 
 ```
 
@@ -1208,31 +1596,47 @@ For these last two open question, comments were read, common themes were detecte
 
 ```{r}
 
-plot_q31b <- ggplot(data = subset(student_open, !is.na(goals_training)),
-                   mapping = aes (x = goals_training, fill = goals_training)) +
-  geom_bar(color = "black") + #barcharts
-  facet_wrap(~ Year) + # create a different plot for each Year
-  labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
-  scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,9)
 
-plot_q31b_full <- ggplot(data = subset(student_open, !is.na(goals_training)),
-                   mapping = aes (x = goals_training, fill = goals_training)) +
+plot_q31b <-
+  ggplot(
+    data = subset(student_open,!is.na(goals_training)),
+    mapping = aes (x = goals_training, fill = goals_training)
+  ) +
+  geom_bar(color = "black") + #barcharts
+  facet_wrap( ~ Year) + # create a different plot for each Year
+  labs(x = "Answer", y = "Count", fill = "Answer") +
+  theme(axis.text.x = element_blank()) +
+  scale_fill_brewer(palette = "Paired") + theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 9)
+
+plot_q31b_full <-
+  ggplot(
+    data = subset(student_open,!is.na(goals_training)),
+    mapping = aes (x = goals_training, fill = goals_training)
+  ) +
   geom_bar(color = "black") +
   labs(x = "Answer", y = "Count", fill = "Answer") +
-  theme(axis.text.x = element_blank())+
+  theme(axis.text.x = element_blank()) +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "none",axis.title.x = element_blank())+ 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,25)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "none",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 25)
 
 gridExtra::grid.arrange(plot_q31b_full,
                         plot_q31b,
                         ncol = 2,
-                        top = "What was your main objective when engaging with training?")
+top = "What was your main objective when engaging with training?")
 
 ```
+
 
 -   "in person" = prefferred training to be delivered in person in the future
 
@@ -1241,13 +1645,22 @@ gridExtra::grid.arrange(plot_q31b_full,
 -   "good but missing" = training was good but lacked courses on some topics
 
 ```{r}
-plot_q32 <- ggplot(data = subset(student_open, !is.na(comments)),
-                   mapping = aes (x = comments, fill = comments)) +
+plot_q32 <- ggplot(
+  data = subset(student_open,!is.na(comments)),
+  mapping = aes (x = comments, fill = comments)
+) +
   geom_bar(color = "black") + #barcharts + # create a different plot for each Year
-  labs(title = "General comments on training?" , x = "Answer", y = "Count", fill = "Answer") +
+  labs(title = "General comments on training?" ,
+       x = "Answer",
+       y = "Count",
+       fill = "Answer") +
   scale_fill_brewer(palette = "Paired") + theme_classic() +
-  theme(axis.text.x = element_text(angle = 90), legend.position = "Accent",axis.title.x = element_blank()) + 
-  geom_text(stat='count', aes(label=..count..), vjust=-1) + ylim(0,5)
+  theme(
+    axis.text.x = element_text(angle = 90),
+    legend.position = "Accent",
+    axis.title.x = element_blank()
+  ) +
+  geom_text(stat = 'count', aes(label = ..count..), vjust = -1) + ylim(0, 5)
 
 plot_q32
 
@@ -1257,7 +1670,22 @@ plot_q32
 
 ```{r}
 
+
 summary = lapply(student_survey_responses[-c(1:5)], table)
 
 save(summary, file = "summary_tally.RData")
+```
+
+
+## Addition after review: table with response rates
+
+```{r}
+resp_rates = gt(data.frame("Survey" = c("Programmes", "Students"),
+           "Respondents" = c("10", "35"),
+           "Year1" = c("", "9"),
+           "Year2" = c("", "15"),
+           "Year3" = c("", "11")),
+   rowname_col = "Survey")
+
+gtsave(resp_rates, "resp_rates.docx")
 ```
