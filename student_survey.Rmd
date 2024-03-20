@@ -1,11 +1,13 @@
 ---
 title: "Taskforce 3 Data Analysis Subgroup Report - Review 2"
 author: "Laetitia, Giulia, John, Winfred"
-output: 
+output:
   html_document:
     code_folding: hide
     toc: true
     toc_float: true
+  pdf_document:
+    toc: true
 ---
 
 # Data analysis approach
@@ -694,7 +696,7 @@ plot_q11 <- ggplot(subset(dat_studentupdated,!is.na(wellbeing)),
 gridExtra::grid.arrange(plot_q11_full,
                         plot_q11,
                         ncol = 2,
-                        top = "Usefulness of personal development training (n=32)")
+                        top = "Usefulness of wellbeing training (n=32)")
 ```
 
 ```{r, message=FALSE}
@@ -833,7 +835,7 @@ plot_q15 <-
 gridExtra::grid.arrange(plot_q15_full,
                         plot_q15,
                         ncol = 2,
-                        top = "Usefulness of engaging and outreach training (n=32)")
+                        top = "Usefulness of engagement and outreach training (n=32)")
 ```
 
 Data for the following question was looked at and grouped into the following variable manually due to its free-text nature (Distribution of answers : NA / Yes (including detailed comments) / No)
@@ -1227,7 +1229,7 @@ q24_table = student_survey_responses_q24_clean %>% group_by(Year, Q24) %>% summa
 gridExtra::grid.arrange(plot_q24_full,
                         plot_q24,
                         ncol = 2,
-                        top = "Training offered by my programme is compulsory (n = 33)")
+                        top = "Compulsory training was a good use of my time and resources (n = 33)")
 
 ```
 
